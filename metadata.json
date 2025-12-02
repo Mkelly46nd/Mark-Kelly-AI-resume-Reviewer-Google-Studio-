@@ -1,0 +1,5 @@
+{
+  "name": "Copy of AI Resume Coach",
+  "description": "An AI-powered tool to analyze resumes, provide feedback, and suggest ATS-friendly improvements using Google Gemini.",
+  "requestFramePermissions": []
+}
