@@ -1,3 +1,4 @@
+
 # AI Resume Coach
 
 ## Project Overview
@@ -32,6 +33,14 @@ This application solves that problem by allowing users to paste their resume tex
     *   Open http://localhost:3000 in your browser to view the app.
 
 *(Note: If deploying to GitHub Pages, run `npm run build` and deploy the output directory.)*
+
+### Using the Sample Resume
+To quickly test the application without using your own data:
+1.  Open the file `SAMPLE_RESUME.txt` located in this repository.
+2.  Copy the entire text content.
+3.  Paste it into the **"Paste Your Resume"** text area in the application.
+4.  (Optional) Enter a job description like "Product Manager" or "Biotech Researcher".
+5.  Click **"Review My Resume"** to see the AI analysis in action.
 
 ## AI Component Explanation
 
