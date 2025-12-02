@@ -7,6 +7,8 @@ This application solves that problem by allowing users to paste their resume tex
 
 ## Instructions for Viewing/Running
 
+**Live Application:** [https://copy-of-ai-resume-coach-417344229309.us-west1.run.app/](https://copy-of-ai-resume-coach-417344229309.us-west1.run.app/)
+
 ### Prerequisites
 *   Node.js installed on your machine.
 *   A Google Gemini API Key.
