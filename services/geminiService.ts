@@ -1,111 +1,110 @@
+
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { AnalysisResponse, ResumeAnalysisRequest } from "../types";
 
 const apiKey = process.env.API_KEY;
 
-// Define the schema strictly using the Type enum from the SDK
 const analysisSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    overallScore: {
-      type: Type.INTEGER,
-      description: "A score from 0 to 100 rating the resume quality.",
-    },
-    executiveSummary: {
-      type: Type.STRING,
-      description: "A brief paragraph summarizing the overall quality and impression of the resume.",
-    },
-    strengths: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
-      description: "List of 3-5 strong points about the resume.",
-    },
-    weaknesses: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
-      description: "List of 3-5 weak points regarding clarity, verbs, or structure.",
-    },
+    overallScore: { type: Type.INTEGER },
+    executiveSummary: { type: Type.STRING },
+    strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
+    weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
     improvements: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          originalText: { type: Type.STRING, description: "The original sentence or bullet point." },
-          suggestedRewrite: { type: Type.STRING, description: "A professional, action-oriented rewrite." },
-          reason: { type: Type.STRING, description: "Why the rewrite is better (e.g., 'Uses stronger verb', 'Quantifies impact')." },
+          originalText: { type: Type.STRING },
+          suggestedRewrite: { type: Type.STRING },
+          reason: { type: Type.STRING },
         },
         required: ["originalText", "suggestedRewrite", "reason"],
       },
-      description: "3 specific examples of text to improve.",
     },
     atsAnalysis: {
       type: Type.OBJECT,
       properties: {
-        score: { type: Type.INTEGER, description: "ATS compatibility score 0-100." },
-        missingKeywords: { 
-          type: Type.ARRAY, 
-          items: { type: Type.STRING },
-          description: "Keywords found in the job description (if provided) that are missing from the resume." 
-        },
-        formattingIssues: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING },
-          description: "Potential formatting issues that might confuse an ATS."
-        }
+        score: { type: Type.INTEGER },
+        missingKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+        formattingIssues: { type: Type.ARRAY, items: { type: Type.STRING } }
       },
       required: ["score", "missingKeywords", "formattingIssues"],
     },
+    interviewQuestions: { type: Type.ARRAY, items: { type: Type.STRING } },
+    successRoadmap: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          task: { type: Type.STRING },
+          priority: { type: Type.STRING, enum: ["High", "Medium", "Low"] }
+        },
+        required: ["task", "priority"]
+      },
+    },
+    marketInsights: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          trend: { type: Type.STRING, description: "Short name of the trend or skill." },
+          description: { type: Type.STRING, description: "Detailed market insight or salary context." }
+        },
+        required: ["trend", "description"]
+      }
+    }
   },
-  required: ["overallScore", "executiveSummary", "strengths", "weaknesses", "improvements", "atsAnalysis"],
+  required: ["overallScore", "executiveSummary", "strengths", "weaknesses", "improvements", "atsAnalysis", "interviewQuestions", "successRoadmap", "marketInsights"],
 };
 
 export const analyzeResume = async (data: ResumeAnalysisRequest): Promise<AnalysisResponse> => {
-  if (!apiKey) {
-    throw new Error("API Key is missing");
-  }
-
+  if (!apiKey) throw new Error("API Key is missing");
   const ai = new GoogleGenAI({ apiKey });
 
-  const systemInstruction = `You are an expert Career Coach and Resume Reviewer with 20 years of experience in HR and recruiting. 
-  Your goal is to provide honest, constructive, and actionable feedback to job seekers.
+  const systemInstruction = `You are an elite Career Strategist at a top-tier executive search firm. 
+  Your task is to analyze resumes with brutal honesty and strategic depth.
   
-  Analyze the provided resume text. If a job description is provided, tailor your analysis to how well the resume matches that specific role.
+  1. Evaluate the resume's overall impact and 'hireability'.
+  2. Provide specific, actionable rewrites that replace passive duties with quantified achievements.
+  3. Identify ATS gaps based on the target Job Description (if provided).
+  4. Predict the toughest interview questions based on perceived gaps in the profile.
+  5. Provide 'Market Insights' - what are the current trends, salary expectations, or 'hot' certifications for this specific professional profile?
   
-  Focus on:
-  1. Impact: Are achievements quantified? (e.g., "Increased sales by 20%" vs "Managed sales").
-  2. Clarity & Brevity: Is the language concise and professional?
-  3. Action Verbs: Does it use strong action verbs?
-  4. ATS Compatibility: Are standard keywords present?
-  
-  Be specific in your "improvements" section. Provide actual rewritten examples that sound professional and impactful.`;
+  Format everything for maximum clarity.`;
 
-  const prompt = `
-  RESUME TEXT:
-  ${data.resumeText}
+  const prompt = `RESUME TEXT:\n${data.resumeText}\n\nTARGET JOB DESCRIPTION:\n${data.jobDescription || 'General Professional Placement'}`;
 
-  ${data.jobDescription ? `TARGET JOB DESCRIPTION:\n${data.jobDescription}` : 'TARGET JOB: General Professional Role (No specific job description provided, analyze for general best practices).'}
-  `;
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: { 
+      systemInstruction, 
+      responseMimeType: "application/json", 
+      responseSchema: analysisSchema,
+      temperature: 0.2 // Lower temperature for more consistent analytical output
+    },
+  });
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction: systemInstruction,
-        responseMimeType: "application/json",
-        responseSchema: analysisSchema,
-        temperature: 0.4, // Lower temperature for more consistent/analytical results
-      },
-    });
+  const text = response.text;
+  if (!text) throw new Error("Empty response from AI engine");
+  return JSON.parse(text) as AnalysisResponse;
+};
 
-    const text = response.text;
-    if (!text) {
-      throw new Error("No response received from AI.");
-    }
+export const generateCoverLetter = async (resume: string, jd: string): Promise<string> => {
+  if (!apiKey) throw new Error("API Key is missing");
+  const ai = new GoogleGenAI({ apiKey });
 
-    return JSON.parse(text) as AnalysisResponse;
-  } catch (error) {
-    console.error("Error analyzing resume:", error);
-    throw error;
-  }
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: `Write a high-impact, persuasive cover letter. 
+    Match resume achievements to Job Description requirements using a 'hooks and results' approach.
+    Keep it concise and punchy.
+    
+    RESUME: ${resume}
+    JD: ${jd}`,
+  });
+
+  return response.text || "Unable to generate cover letter.";
 };

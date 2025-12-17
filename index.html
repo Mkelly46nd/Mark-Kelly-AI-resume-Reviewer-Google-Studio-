@@ -1,21 +1,83 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Resume Coach</title>
+    <title>AI Resume Coach | Premium Career Tools</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-      body {
-        font-family: 'Inter', sans-serif;
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+      
+      :root {
+        --primary: #6366f1; /* Indigo */
+        --secondary: #ec4899; /* Pink */
+        --accent: #06b6d4; /* Cyan */
       }
+
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #fdfdff;
+        color: #0f172a;
+        overflow-x: hidden;
+      }
+
+      /* Animated background blobs */
+      .bg-blob {
+        position: fixed;
+        width: 600px;
+        height: 600px;
+        filter: blur(100px);
+        z-index: -1;
+        opacity: 0.15;
+        border-radius: 50%;
+        animation: blob-float 20s infinite alternate;
+      }
+
+      @keyframes blob-float {
+        from { transform: translate(0, 0) scale(1); }
+        to { transform: translate(100px, 100px) scale(1.1); }
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+
       .scrollbar-hide::-webkit-scrollbar {
           display: none;
       }
       .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
+      }
+
+      @keyframes slide-up {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      .animate-slide-up {
+        animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .gradient-text {
+        background: linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #f59e0b 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Print Optimization */
+      @media print {
+        body { background: white !important; padding: 0 !important; font-size: 10pt; }
+        nav, footer, button, .print-hidden, .bg-blob { display: none !important; }
+        main { padding-top: 0 !important; max-width: 100% !important; margin: 0 !important; }
+        .rounded-2xl, .rounded-xl, .rounded-3xl { border-radius: 0 !important; border: none !important; border-bottom: 1px solid #e2e8f0 !important; }
+        .shadow-sm, .shadow-xl, .shadow-2xl, .glass-card { shadow: none !important; box-shadow: none !important; background: white !important; border: none !important; }
+        .grid { display: block !important; }
+        .grid > * { margin-bottom: 1.5rem !important; page-break-inside: avoid; }
+        h1, h2, h3 { color: black !important; -webkit-text-fill-color: black !important; }
       }
     </style>
   <script type="importmap">
@@ -24,12 +86,17 @@
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "pdfjs-dist": "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/+esm",
+    "mammoth": "https://cdn.jsdelivr.net/npm/mammoth@1.9.0/+esm"
   }
 }
 </script>
 </head>
-  <body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+  <body class="antialiased min-h-screen">
+    <div class="bg-blob bg-indigo-400 top-[-200px] left-[-200px]"></div>
+    <div class="bg-blob bg-pink-400 bottom-[-200px] right-[-200px]" style="animation-delay: -5s"></div>
+    <div class="bg-blob bg-cyan-400 top-[20%] right-[-100px]" style="animation-delay: -10s"></div>
     <div id="root"></div>
   </body>
 </html>

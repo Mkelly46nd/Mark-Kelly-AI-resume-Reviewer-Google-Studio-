@@ -1,3 +1,4 @@
+
 export interface ResumeAnalysisRequest {
   resumeText: string;
   jobDescription?: string;
@@ -15,6 +16,16 @@ export interface AtsAnalysis {
   formattingIssues: string[];
 }
 
+export interface RoadmapStep {
+  task: string;
+  priority: 'High' | 'Medium' | 'Low';
+}
+
+export interface MarketInsight {
+  trend: string;
+  description: string;
+}
+
 export interface AnalysisResponse {
   overallScore: number;
   executiveSummary: string;
@@ -22,4 +33,7 @@ export interface AnalysisResponse {
   weaknesses: string[];
   improvements: ImprovementSuggestion[];
   atsAnalysis: AtsAnalysis;
+  interviewQuestions: string[];
+  successRoadmap: RoadmapStep[];
+  marketInsights: MarketInsight[];
 }
